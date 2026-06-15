@@ -17,7 +17,9 @@
 package io.aiven.kafka.connect.jdbc;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.common.utils.Time;
@@ -28,7 +30,8 @@ import org.apache.kafka.connect.runtime.ConnectorConfig;
 import org.apache.kafka.connect.runtime.Herder;
 import org.apache.kafka.connect.runtime.Worker;
 import org.apache.kafka.connect.runtime.isolation.Plugins;
-import org.apache.kafka.connect.runtime.rest.RestServer;
+import org.apache.kafka.connect.runtime.rest.ConnectRestServer;
+import org.apache.kafka.connect.runtime.rest.RestClient;
 import org.apache.kafka.connect.runtime.rest.entities.ConnectorInfo;
 import org.apache.kafka.connect.runtime.standalone.StandaloneConfig;
 import org.apache.kafka.connect.runtime.standalone.StandaloneHerder;
@@ -78,10 +81,17 @@ public final class ConnectRunner {
         final StandaloneConfig config = new StandaloneConfig(workerProps);
 
         final ConnectorClientConfigOverridePolicy overridePolicy = new AllConnectorClientConfigOverridePolicy();
-        final Worker worker = new Worker(workerId, time, plugins, config, new MemoryOffsetBackingStore(),
+        final MemoryOffsetBackingStore offsetBackingStore = new MemoryOffsetBackingStore() {
+            @Override
+            public Set<Map<String, Object>> connectorPartitions(final String connectorName) {
+                return Collections.emptySet();
+            }
+        };
+        final Worker worker = new Worker(workerId, time, plugins, config, offsetBackingStore,
             overridePolicy);
         herder = new StandaloneHerder(worker, kafkaClusterId, overridePolicy);
-        final RestServer restServer = new RestServer(config);
+        final RestClient restClient = new RestClient(config);
+        final ConnectRestServer restServer = new ConnectRestServer(null, restClient, workerProps);
         restServer.initializeServer();
         restServer.initializeResources(herder);
         connect = new Connect(herder, restServer);

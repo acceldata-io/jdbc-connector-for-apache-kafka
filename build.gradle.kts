@@ -43,8 +43,8 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
 }
 
@@ -117,7 +117,7 @@ publishing {
     }
 }
 
-val kafkaVersion = "3.3.2"
+val kafkaVersion = "4.3.0"
 val slf4jVersion = "2.0.13"
 
 val avroVersion = "1.8.1"
