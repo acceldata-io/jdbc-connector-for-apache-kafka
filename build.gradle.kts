@@ -37,9 +37,19 @@ plugins {
     idea
 }
 
+val mavenUrl = findProperty("mavenUrl") as String? ?: ""
+val snapMavenUrl = findProperty("snapMavenUrl") as String? ?: ""
+val mavenUsername = findProperty("mavenUsername") as String? ?: ""
+val mavenPassword = findProperty("mavenPassword") as String? ?: ""
+val mavenProxyUrl = findProperty("mavenProxyUrl") as String? ?: ""
+
 repositories {
-    mavenCentral()
-    maven("https://packages.confluent.io/maven")
+    if (mavenProxyUrl.isNotEmpty()) {
+        maven(mavenProxyUrl)
+    } else {
+        mavenCentral()
+        maven("https://packages.confluent.io/maven")
+    }
 }
 
 java {
@@ -82,6 +92,13 @@ distributions {
 
 publishing {
     publications {
+        register("jdbc", MavenPublication::class) {
+            groupId = "io.aiven"
+            artifactId = "aiven-kafka-connect-jdbc"
+            version = project.version.toString()
+            artifact(tasks.jar)
+        }
+
         register("maven", MavenPublication::class) {
             // Defaults, for clarity
             groupId = groupId
@@ -111,6 +128,25 @@ publishing {
                     developerConnection = "scm:git:git@github.com:aiven/jdbc-connector-for-apache-kafka.git"
                     url = "https://github.com/aiven/jdbc-connector-for-apache-kafka"
                     tag = "HEAD"
+                }
+            }
+        }
+    }
+
+    if (mavenUrl.isNotEmpty() || snapMavenUrl.isNotEmpty()) {
+        repositories {
+            maven {
+                /*
+                 * Add to ~/.gradle/gradle.properties to publish to Nexus:
+                 * mavenUrl=https://repo1.acceldata.dev/repository/odp-staging-release/
+                 * snapMavenUrl=https://repo1.acceldata.dev/repository/odp-staging-snapshot/
+                 * mavenUsername=xxx
+                 * mavenPassword=xxx
+                 */
+                url = uri(if (version.toString().endsWith("SNAPSHOT")) snapMavenUrl else mavenUrl)
+                credentials {
+                    username = mavenUsername
+                    password = mavenPassword
                 }
             }
         }
