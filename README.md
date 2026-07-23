@@ -26,7 +26,7 @@ For the Sink connector it could be found at
 Prerequisites for building JDBC connector for Apache Kafka:
 
 * Git
-* Java 11
+* Java 17
 
 ```
 git clone git@github.com:aiven/jdbc-connector-for-apache-kafka.git
