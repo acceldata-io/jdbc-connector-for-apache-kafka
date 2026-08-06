@@ -66,6 +66,9 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
+tasks.matching { it.name.startsWith("generateMetadataFileFor") }.configureEach {
+    enabled = false
+}
 
 distributions {
     named("main") {
@@ -87,7 +90,7 @@ publishing {
             artifactId = "aiven-kafka-connect-jdbc"
             version = project.version.toString()
 
-            from(components["java"])
+            artifact(tasks.named("jar"))
 
             pom {
                 name = "Aiven's JDBC Sink and Source Connectors for Apache Kafka"
