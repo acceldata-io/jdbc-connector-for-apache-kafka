@@ -83,10 +83,9 @@ distributions {
 publishing {
     publications {
         register("maven", MavenPublication::class) {
-            // Defaults, for clarity
-            groupId = groupId
-            artifactId = "jdbc-connector-for-apache-kafka"
-            version = version
+            groupId = "io.aiven"
+            artifactId = "aiven-kafka-connect-jdbc"
+            version = project.version.toString()
 
             from(components["java"])
 
@@ -112,6 +111,27 @@ publishing {
                     url = "https://github.com/aiven/jdbc-connector-for-apache-kafka"
                     tag = "HEAD"
                 }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            val releasesRepoUrl = if (project.hasProperty("mavenUrl")) {
+                project.property("mavenUrl").toString()
+            } else {
+                "https://repo1.acceldata.dev/repository/odp-staging-release/"
+            }
+            val snapshotsRepoUrl = if (project.hasProperty("snapMavenUrl")) {
+                project.property("snapMavenUrl").toString()
+            } else {
+                "https://repo1.acceldata.dev/repository/odp-staging-snapshot/"
+            }
+            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+
+            credentials {
+                username = (project.findProperty("mavenUsername") ?: "").toString()
+                password = (project.findProperty("mavenPassword") ?: "").toString()
             }
         }
     }
