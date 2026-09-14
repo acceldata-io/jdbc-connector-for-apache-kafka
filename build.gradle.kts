@@ -137,7 +137,7 @@ publishing {
     }
 }
 
-val kafkaVersion = "4.3.0"
+val kafkaVersion = "4.3.1"
 val slf4jVersion = "2.0.13"
 
 val avroVersion = "1.8.1"
